@@ -97,7 +97,7 @@ export default function AboutPage() {
             className="relative h-96 rounded-2xl overflow-hidden shadow-2xl order-1 md:order-2"
           >
             <Image
-              src="https://unsplash.com/photos/white-textile-hanged-on-black-metal-fence-Ts5lfuC7pDw"
+              src="/about.jpeg"
               alt="Quality Material"
               className="w-full h-full object-cover"
             />
