@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import path from "path";
-import { writeFile, mkdir } from "fs/promises";
 import { prisma } from "@/lib/prisma";
+import { put } from "@vercel/blob";
 
 // Handler GET: Ambil daftar produk
 export async function GET() {
@@ -14,44 +13,40 @@ export async function GET() {
     return NextResponse.json(products);
   } catch {
     return NextResponse.json(
-      { error: "Gagal mengambil data produk" }, 
+      { error: "Gagal mengambil data produk" },
       { status: 500 }
     );
   }
 }
 
-// Handler POST: Upload & Simpan Produk Baru
+// Handler POST: Upload ke Vercel Blob & Simpan DB
 export async function POST(request: Request) {
   try {
     // 1. Baca FormData
     const formData = await request.formData();
-    
+
     // 2. Ambil data input
-    const name = formData.get('name') as string;
-    const price = formData.get('price') as string;
-    const description = formData.get('description') as string;
-    const file = formData.get('image') as File;
+    const name = formData.get("name") as string;
+    const price = formData.get("price") as string;
+    const description = formData.get("description") as string;
+    const file = formData.get("image") as File;
 
     // 3. Validasi Gambar
     if (!file) {
-      return NextResponse.json({ error: 'Gambar wajib diupload' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Gambar wajib diupload" },
+        { status: 400 }
+      );
     }
 
-    // 4. Proses Buffer Gambar
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
 
-    // 5. Siapkan Nama File & Folder
-    const filename = Date.now() + '_' + file.name.replaceAll(' ', '_');
-    const uploadDir = path.join(process.cwd(), 'public/uploads');
+    const blob = await put(file.name, file, {
+      access: "public",
+    });
 
-    await mkdir(uploadDir, { recursive: true });
+    const imageUrl = blob.url;
 
-    // 6. Simpan File ke Harddisk
-    await writeFile(path.join(uploadDir, filename), buffer);
-
-    // 7. Simpan Data ke Database
-    const imageUrl = `/uploads/${filename}`;
+    // 4. Simpan Data ke Database
     const priceInt = parseInt(price);
 
     const newProduct = await prisma.product.create({
@@ -59,17 +54,16 @@ export async function POST(request: Request) {
         name: name,
         price: priceInt,
         description: description,
-        image: imageUrl
-      }
+        image: imageUrl, 
+      },
     });
 
-    return NextResponse.json({ 
-      message: 'Produk berhasil disimpan', 
-      product: newProduct 
+    return NextResponse.json({
+      message: "Produk berhasil disimpan",
+      product: newProduct,
     });
-
   } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Gagal upload produk' }, { status: 500 });
+    console.error("Upload error:", error);
+    return NextResponse.json({ error: "Gagal upload produk" }, { status: 500 });
   }
 }
