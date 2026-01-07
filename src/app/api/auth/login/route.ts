@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import db from "@/lib/prisma";
-import { RowDataPacket } from "mysql2";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
 export async function POST(request: Request) {
@@ -10,11 +9,11 @@ export async function POST(request: Request) {
     const { email, password } = body;
 
     // 1. Cari user berdasarkan email
-    const [rows] = await db.query<RowDataPacket[]>(
-      "SELECT * FROM users WHERE email = ?",
-      [email]
-    );
-    const user = rows[0];
+const user = await prisma.user.findUnique({
+      where: { 
+        email: email 
+      },
+    });
 
     if (!user) {
       return NextResponse.json(

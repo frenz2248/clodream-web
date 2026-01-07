@@ -145,7 +145,6 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-white">
-
       {/* 1. HEADER SECTION */}
       <div className="pt-32 pb-12 px-4 text-center bg-gray-50 border-b border-gray-200">
         <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4 uppercase">
@@ -284,7 +283,7 @@ export default function AdminPage() {
             {products.map((item) => (
               <div
                 key={item.id}
-                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition"
+                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap sm:flex-nowrap items-center gap-4 hover:shadow-md transition"
               >
                 <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
                   {item.image ? (
@@ -299,7 +298,7 @@ export default function AdminPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-[150px]">
                   <h3 className="font-bold text-gray-800 text-lg">
                     {item.name}
                   </h3>
@@ -310,16 +309,16 @@ export default function AdminPage() {
                     {item.description}
                   </p>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-row sm:flex-col w-full sm:w-auto justify-end gap-2 mt-2 sm:mt-0">
                   <button
                     onClick={() => handleEditClick(item)}
-                    className="px-4 py-1.5 text-xs font-bold text-white bg-orange-500 rounded hover:bg-orange-600 transition"
+                    className="flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold text-white bg-orange-500 rounded hover:bg-orange-600 transition text-center"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="px-4 py-1.5 text-xs font-bold text-red-600 border border-red-200 rounded hover:bg-red-50 transition"
+                    className="flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold text-red-600 border border-red-200 rounded hover:bg-red-50 transition text-center"
                   >
                     Hapus
                   </button>

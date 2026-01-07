@@ -1,56 +1,57 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import path from "path";
 import fs from "fs";
 import { writeFile } from "fs/promises";
 
 type Params = Promise<{ id: string }>;
 
-// DELETE 
+// --- DELETE: Hapus Produk ---
 export async function DELETE(request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params;
+    const idNumber = parseInt(id); 
 
-    // 1. Ambil data produk
-    const [rows] = await db.query(
-      "SELECT image FROM products WHERE id = ?",
-      [id]
-    );
+    // 1. Ambil data produk dari database
+    const product = await prisma.product.findUnique({
+      where: { id: idNumber },
+    });
 
-    if (!Array.isArray(rows) || rows.length === 0) {
+    if (!product) {
       return NextResponse.json(
         { message: "Produk tidak ditemukan" },
         { status: 404 }
       );
     }
 
-    const imagePath = (rows[0] as { image: string }).image;
+    // 2. Hapus file gambar fisik di folder (jika ada)
+    if (product.image) {
+      const imagePath = path.join(process.cwd(), "public", product.image);
 
-    // 2. Hapus file gambar jika ada
-    if (imagePath) {
-      const fullPath = path.join(process.cwd(), "public", imagePath);
-
-      if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath); // Hapus file
       }
     }
 
-    // 3. Hapus data produk
-    await db.query("DELETE FROM products WHERE id = ?", [id]);
+    // 3. Hapus data di database
+    await prisma.product.delete({
+      where: { id: idNumber },
+    });
 
     return NextResponse.json({ message: "Produk berhasil dihapus" });
   } catch (error) {
     return NextResponse.json(
-      { message: "Gagal menghapus produk", error },
+      { message: "Gagal menghapus produk", error: String(error) },
       { status: 500 }
     );
   }
 }
 
-// PUT 
+// --- PUT: Update Produk ---
 export async function PUT(request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params;
+    const idNumber = parseInt(id);
     const formData = await request.formData();
 
     const name = formData.get("name") as string;
@@ -59,11 +60,11 @@ export async function PUT(request: Request, { params }: { params: Params }) {
     const file = formData.get("image") as File | null;
     const oldImage = formData.get("oldImage") as string | null;
 
-    let imageUrl = oldImage ?? "";
+    let imageUrl = oldImage ?? null;
 
-    // Jika upload gambar baru
+    // Jika user upload gambar baru
     if (file && file.size > 0) {
-      // 1. Hapus gambar lama
+      // A. Hapus gambar lama dulu biar server gak penuh
       if (oldImage) {
         const oldPath = path.join(process.cwd(), "public", oldImage);
         if (fs.existsSync(oldPath)) {
@@ -71,11 +72,13 @@ export async function PUT(request: Request, { params }: { params: Params }) {
         }
       }
 
-      // 2. Simpan gambar baru
+      // B. Simpan gambar baru
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
+      // Buat nama file unik
       const filename = Date.now() + "_" + file.name.replaceAll(" ", "_");
-
+      
+      // Simpan ke folder public/uploads
       await writeFile(
         path.join(process.cwd(), "public/uploads", filename),
         buffer
@@ -84,17 +87,28 @@ export async function PUT(request: Request, { params }: { params: Params }) {
       imageUrl = `/uploads/${filename}`;
     }
 
+    // Konversi harga ke integer
     const priceInt = parseInt(price);
 
-    await db.query(
-      "UPDATE products SET name = ?, price = ?, description = ?, image = ? WHERE id = ?",
-      [name, priceInt, description, imageUrl, id]
-    );
+    const updatedProduct = await prisma.product.update({
+      where: { id: idNumber },
+      data: {
+        name: name,
+        price: priceInt,
+        description: description,
+        image: imageUrl,
+      },
+    });
 
-    return NextResponse.json({ message: "Update berhasil" });
+    return NextResponse.json({ 
+      message: "Update berhasil", 
+      product: updatedProduct 
+    });
+
   } catch (error) {
+    console.error("Update Error:", error);
     return NextResponse.json(
-      { message: "Gagal memperbarui produk", error },
+      { message: "Gagal memperbarui produk", error: String(error) },
       { status: 500 }
     );
   }

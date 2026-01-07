@@ -1,64 +1,75 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/prisma";
 import path from "path";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
+import { prisma } from "@/lib/prisma";
 
-// Handler untuk metode GET (mendapatkan daftar produk)
+// Handler GET: Ambil daftar produk
 export async function GET() {
   try {
-    const query = "SELECT * FROM products ORDER BY created_at DESC";
-    const [rows] = await db.query(query);
-    return NextResponse.json(rows);
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Internal Server Error";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    const products = await prisma.product.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return NextResponse.json(products);
+  } catch {
+    return NextResponse.json(
+      { error: "Gagal mengambil data produk" }, 
+      { status: 500 }
+    );
   }
 }
 
-// Handler untuk metode POST (menambahkan produk baru)
+// Handler POST: Upload & Simpan Produk Baru
 export async function POST(request: Request) {
   try {
-    // 1. Baca FormData (Bukan JSON lagi)
+    // 1. Baca FormData
     const formData = await request.formData();
     
-    // 2. Ambil data dari form
+    // 2. Ambil data input
     const name = formData.get('name') as string;
     const price = formData.get('price') as string;
     const description = formData.get('description') as string;
     const file = formData.get('image') as File;
 
-    // 3. Validasi: Pastikan ada gambar
+    // 3. Validasi Gambar
     if (!file) {
       return NextResponse.json({ error: 'Gambar wajib diupload' }, { status: 400 });
     }
 
-    // 4. Proses Simpan Gambar ke Folder public/uploads
+    // 4. Proses Buffer Gambar
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Buat nama file unik
+    // 5. Siapkan Nama File & Folder
     const filename = Date.now() + '_' + file.name.replaceAll(' ', '_');
-    
-    // Simpan ke harddisk komputer
-    await writeFile(
-      path.join(process.cwd(), 'public/uploads/' + filename),
-      buffer
-    );
+    const uploadDir = path.join(process.cwd(), 'public/uploads');
 
-    // 5. Simpan URL-nya ke Database
+    await mkdir(uploadDir, { recursive: true });
+
+    // 6. Simpan File ke Harddisk
+    await writeFile(path.join(uploadDir, filename), buffer);
+
+    // 7. Simpan Data ke Database
     const imageUrl = `/uploads/${filename}`;
     const priceInt = parseInt(price);
 
-    await db.query(
-      'INSERT INTO products (name, price, description, image) VALUES (?, ?, ?, ?)',
-      [name, priceInt, description, imageUrl]
-    );
+    const newProduct = await prisma.product.create({
+      data: {
+        name: name,
+        price: priceInt,
+        description: description,
+        image: imageUrl
+      }
+    });
 
-    return NextResponse.json({ message: 'Produk berhasil disimpan' });
+    return NextResponse.json({ 
+      message: 'Produk berhasil disimpan', 
+      product: newProduct 
+    });
 
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Gagal upload' }, { status: 500 });
+    return NextResponse.json({ error: 'Gagal upload produk' }, { status: 500 });
   }
 }

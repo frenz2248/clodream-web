@@ -11,7 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!isAdmin) {
       router.replace("/login");
     }
-  }, []);
+  }, [router]);
 
   return <>{children}</>;
 }

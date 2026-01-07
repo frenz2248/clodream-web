@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
 export async function PUT(request: Request) {
@@ -10,15 +10,15 @@ export async function PUT(request: Request) {
     if (newPassword && newPassword.length > 0) {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-      await db.query(
-        "UPDATE users SET name = ?, password = ? WHERE email = ?",
-        [name, hashedPassword, email]
-      );
+      await prisma.user.update({
+        where: { email },
+        data: { name, password: hashedPassword },
+      });
     } else {
-      await db.query("UPDATE users SET name = ? WHERE email = ?", [
-        name,
-        email,
-      ]);
+      await prisma.user.update({
+        where: { email },
+        data: { name },
+      });
     }
 
     return NextResponse.json({ message: "Profil berhasil diupdate!" });
