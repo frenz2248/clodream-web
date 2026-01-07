@@ -33,7 +33,7 @@ export default function AboutPage() {
             className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
           >
             <Image
-              src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=800"
+              src="/clodream2.jpg"
               alt="Clodream Store"
               className="w-full h-full object-cover"
             />
@@ -97,7 +97,7 @@ export default function AboutPage() {
             className="relative h-96 rounded-2xl overflow-hidden shadow-2xl order-1 md:order-2"
           >
             <Image
-              src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=800"
+              src="https://unsplash.com/photos/white-textile-hanged-on-black-metal-fence-Ts5lfuC7pDw"
               alt="Quality Material"
               className="w-full h-full object-cover"
             />
