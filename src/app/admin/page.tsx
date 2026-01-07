@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   useState,
   useEffect,
@@ -218,7 +219,7 @@ export default function AdminPage() {
                   </label>
                   {previewImage && (
                     <div className="mb-2 mt-1 relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden border">
-                      <img
+                      <Image
                         src={previewImage}
                         alt="Preview"
                         className="w-full h-full object-cover"
@@ -287,7 +288,7 @@ export default function AdminPage() {
               >
                 <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
                   {item.image ? (
-                    <img
+                    <Image
                       src={item.image}
                       alt={item.name}
                       className="w-full h-full object-cover"

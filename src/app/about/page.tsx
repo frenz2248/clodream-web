@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 export default function AboutPage() {
@@ -31,7 +32,7 @@ export default function AboutPage() {
             transition={{ duration: 0.5 }}
             className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
           >
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=800"
               alt="Clodream Store"
               className="w-full h-full object-cover"
@@ -95,7 +96,7 @@ export default function AboutPage() {
             transition={{ duration: 0.5 }}
             className="relative h-96 rounded-2xl overflow-hidden shadow-2xl order-1 md:order-2"
           >
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=800"
               alt="Quality Material"
               className="w-full h-full object-cover"
