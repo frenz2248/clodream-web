@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine 
+    container_name: clodream_postgres_container
+    restart: always
+    environment:
+      POSTGRES_USER: clodreamuser
+      POSTGRES_PASSWORD: clodreampass
+      POSTGRES_DB: clodreamdb
+    ports:
+      - '5435:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

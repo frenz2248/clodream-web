@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../node_modules/.prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. Model User
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 2. Model Product
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Int
+  description String
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
