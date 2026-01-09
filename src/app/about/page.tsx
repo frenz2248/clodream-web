@@ -35,7 +35,8 @@ export default function AboutPage() {
             <Image
               src="/clodream2.jpg"
               alt="Clodream Store"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </motion.div>
 
@@ -99,7 +100,8 @@ export default function AboutPage() {
             <Image
               src="/about.jpeg"
               alt="Quality Material"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </motion.div>
         </div>

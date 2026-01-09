@@ -66,7 +66,7 @@ export default async function CatalogPage() {
   );
 }
 
-// --- KOMPONEN KARTU PRODUK ---
+// KOMPONEN KARTU PRODUK
 function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-xl hover:border-red-100 transition-all duration-300 relative">

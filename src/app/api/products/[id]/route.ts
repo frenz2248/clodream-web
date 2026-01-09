@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import path from "path";
-import fs from "fs";
-import { writeFile } from "fs/promises";
+import { put, del } from "@vercel/blob";
+
+export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ id: string }>;
 
-// --- DELETE: Hapus Produk ---
+// DELETE: Hapus Produk & Hapus Gambar di Blob
 export async function DELETE(request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params;
     const idNumber = parseInt(id); 
 
-    // 1. Ambil data produk dari database
+    // 1. Cek produk ada atau tidak
     const product = await prisma.product.findUnique({
       where: { id: idNumber },
     });
@@ -24,16 +24,16 @@ export async function DELETE(request: Request, { params }: { params: Params }) {
       );
     }
 
-    // 2. Hapus file gambar fisik di folder (jika ada)
+    // 2. Hapus gambar dari Vercel Blob jika ada
     if (product.image) {
-      const imagePath = path.join(process.cwd(), "public", product.image);
-
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath); // Hapus file
+      try {
+        await del(product.image);
+      } catch (error) {
+        console.error("Gagal hapus gambar di Blob (mungkin sudah hilang):", error);
       }
     }
 
-    // 3. Hapus data di database
+    // 3. Hapus data di Database
     await prisma.product.delete({
       where: { id: idNumber },
     });
@@ -47,7 +47,7 @@ export async function DELETE(request: Request, { params }: { params: Params }) {
   }
 }
 
-// --- PUT: Update Produk ---
+// PUT: Update Produk & Ganti Gambar
 export async function PUT(request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params;
@@ -57,46 +57,41 @@ export async function PUT(request: Request, { params }: { params: Params }) {
     const name = formData.get("name") as string;
     const price = formData.get("price") as string;
     const description = formData.get("description") as string;
+    
     const file = formData.get("image") as File | null;
-    const oldImage = formData.get("oldImage") as string | null;
+    const oldImageUrl = formData.get("oldImage") as string | null;
 
-    let imageUrl = oldImage ?? null;
+    let finalImageUrl = oldImageUrl; 
 
-    // Jika user upload gambar baru
+    // JIKA ADA GAMBAR BARU DIUPLOAD
     if (file && file.size > 0) {
-      // A. Hapus gambar lama dulu biar server gak penuh
-      if (oldImage) {
-        const oldPath = path.join(process.cwd(), "public", oldImage);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
+      
+      // A. Hapus gambar lama dari Blob supaya storage tidak penuh
+      if (oldImageUrl) {
+        try {
+          await del(oldImageUrl);
+        } catch {
+          console.log("Gambar lama tidak ditemukan di blob, skip delete.");
         }
       }
 
-      // B. Simpan gambar baru
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      // Buat nama file unik
-      const filename = Date.now() + "_" + file.name.replaceAll(" ", "_");
-      
-      // Simpan ke folder public/uploads
-      await writeFile(
-        path.join(process.cwd(), "public/uploads", filename),
-        buffer
-      );
+      // B. Upload gambar baru ke Blob
+      const blob = await put(file.name, file, {
+        access: 'public',
+      });
 
-      imageUrl = `/uploads/${filename}`;
+      // C. Pakai URL baru
+      finalImageUrl = blob.url;
     }
 
-    // Konversi harga ke integer
-    const priceInt = parseInt(price);
-
+    // Update Database
     const updatedProduct = await prisma.product.update({
       where: { id: idNumber },
       data: {
         name: name,
-        price: priceInt,
+        price: parseInt(price),
         description: description,
-        image: imageUrl,
+        image: finalImageUrl,
       },
     });
 

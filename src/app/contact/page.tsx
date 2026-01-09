@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function ContactPage() {
   return (
@@ -69,7 +70,7 @@ export default function ContactPage() {
               <div className="space-y-4">
                 {/* Tombol WhatsApp */}
                 <a
-                  href="https://wa.me/6281232037618" 
+                  href="https://wa.me/6281232037618"
                   target="_blank"
                   className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 group transition-all duration-300"
                 >
@@ -106,20 +107,21 @@ export default function ContactPage() {
                 </a>
 
                 {/* Tombol Email */}
-                <a
-                  href="clodreamofficial@gmail.com"
+                <Link
+                  href="mailto:clodreamofficial@gmail.com"
                   className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:border-red-500 hover:bg-red-50 group transition-all duration-300"
                 >
                   <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-2xl group-hover:scale-110 transition">
                     ✉️
                   </div>
+
                   <div>
                     <h4 className="font-bold text-gray-800 group-hover:text-red-700">
                       Email
                     </h4>
                     <p className="text-sm text-gray-500">Kerjasama & Bisnis</p>
                   </div>
-                </a>
+                </Link>
               </div>
             </motion.div>
           </div>
@@ -158,4 +160,3 @@ export default function ContactPage() {
     </main>
   );
 }
-
