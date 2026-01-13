@@ -222,7 +222,8 @@ export default function AdminPage() {
                       <Image
                         src={previewImage}
                         alt="Preview"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       {isEditing && !imageFile && (
                         <div className="absolute bottom-0 left-0 bg-black/50 text-white text-xs p-1 w-full text-center">
@@ -286,12 +287,13 @@ export default function AdminPage() {
                 key={item.id}
                 className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap sm:flex-nowrap items-center gap-4 hover:shadow-md transition"
               >
-                <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
                   {item.image ? (
                     <Image
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
@@ -351,20 +353,6 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  Nama Admin
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={profileData.name}
-                  onChange={(e) =>
-                    setProfileData({ ...profileData, name: e.target.value })
-                  }
-                  className="w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
-                />
-              </div>
-              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Password Baru{" "}
                   <span className="text-gray-400 font-normal">(Opsional)</span>
